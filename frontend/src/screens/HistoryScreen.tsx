@@ -81,7 +81,7 @@ export const HistoryScreen = () => {
           <motion.div 
             key={item.id}
             whileTap={{ scale: 0.98 }}
-            className="bg-surface-container-lowest p-6 rounded-[32px] editorial-shadow flex gap-6 group transition-all cursor-pointer hover:bg-surface-container-low"
+            className="bg-surface-container-lowest p-6 rounded-[32px] shadow-editorial flex gap-6 group transition-all cursor-pointer hover:bg-surface-container-low"
           >
             <div className="w-28 h-28 rounded-[24px] overflow-hidden shrink-0 bg-surface-container">
               <img 

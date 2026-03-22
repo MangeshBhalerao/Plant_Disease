@@ -27,26 +27,36 @@
 
   --radius-xl: 1rem;
   --radius-2xl: 1.5rem;
+
+  --shadow-editorial: 0 32px 64px rgba(25, 28, 27, 0.06);
 }
 
 @layer base {
   body {
-    @apply bg-surface text-on-surface font-sans antialiased;
+    @apply bg-surface text-on-surface font-sans antialiased selection:bg-primary/20 selection:text-primary;
   }
 }
 
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-.no-scrollbar {
+@utility no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
-.glass {
-  @apply bg-surface-container-lowest/70 backdrop-blur-md;
+@utility glass {
+  @apply bg-white/40 backdrop-blur-2xl border border-white/20;
 }
 
-.editorial-shadow {
-  box-shadow: 0 20px 40px rgba(25, 28, 27, 0.04);
+@utility text-gradient {
+  @apply bg-clip-text text-transparent bg-gradient-to-br from-primary to-primary-container;
+}
+
+@utility btn-primary {
+  @apply bg-primary text-white font-bold rounded-[24px] shadow-2xl shadow-primary/20 hover:bg-primary-container transition-all hover:-translate-y-1 active:scale-95;
+}
+
+@utility card-refined {
+  @apply bg-surface-container-lowest rounded-[48px] border border-outline-variant/10 shadow-editorial transition-all hover:border-primary/20;
 }
