@@ -9,3 +9,10 @@ export interface ScanResult {
   date: string;
   image: string;
 }
+
+export interface DetectResponse {
+  disease: string;
+  confidence: number;
+  remedy: string;
+  image_path: string;
+}

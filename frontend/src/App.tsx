@@ -12,7 +12,7 @@ import { HomeScreen } from './screens/HomeScreen';
 import { ResultsScreen } from './screens/ResultsScreen';
 import { HistoryScreen } from './screens/HistoryScreen';
 import { ProfileScreen } from './screens/ProfileScreen';
-import { Screen } from './types';
+import { Screen, DetectResponse } from './types';
 import { cn } from './utils/cn';
 
 const desktopNavItems = [
@@ -25,6 +25,7 @@ const desktopNavItems = [
 export default function App() {
   const [currentScreen, setScreen] = useState<Screen>('home');
   const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState<DetectResponse | null>(null);
 
   return (
     <div className="min-h-screen relative">
@@ -120,11 +121,11 @@ export default function App() {
             <motion.button
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
-              onClick={() => setScreen('results')}
+              onClick={() => setScreen('home')}
               className="btn-primary px-5 py-2.5 text-sm flex items-center gap-2"
             >
               <Scan className="w-4 h-4" />
-              Start Scan
+              New Scan
             </motion.button>
           </div>
         </nav>
@@ -144,8 +145,22 @@ export default function App() {
           ============================ */}
       <main className="relative z-10 pt-20 sm:pt-24 pb-24 md:pb-12 px-4 sm:px-6 max-w-7xl mx-auto w-full">
         <AnimatePresence mode="wait">
-          {currentScreen === 'home' && <HomeScreen key="home" />}
-          {currentScreen === 'results' && <ResultsScreen key="results" />}
+          {currentScreen === 'home' && (
+            <HomeScreen 
+              key="home" 
+              onAnalyzeComplete={(res) => {
+                setAnalysisResult(res);
+                setScreen('results');
+              }} 
+            />
+          )}
+          {currentScreen === 'results' && (
+            <ResultsScreen 
+              key="results" 
+              result={analysisResult} 
+              onNewScan={() => setScreen('home')} 
+            />
+          )}
           {currentScreen === 'history' && <HistoryScreen key="history" />}
           {currentScreen === 'profile' && (
              <ProfileScreen key="profile" onBack={() => setScreen('home')} />

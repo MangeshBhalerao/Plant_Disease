@@ -1,22 +1,16 @@
-# Backend
+# AgriSense Backend API
 
-This folder will contain the Python inference API.
+AgriSense is a FastAPI-powered backend designed to support agricultural technology solutions. This API handles user authentication, data management for crops and diseases, and integrates machine learning endpoints for disease detection.
 
-Planned responsibilities:
+## 🚀 Features
+* **User Authentication:** Secure login and registration using OAuth2 with JWT tokens.
+* **Disease Detection:** API endpoints for processing agricultural data to detect crop diseases.
+* **Database Management:** PostgreSQL integration managed via SQLAlchemy and Alembic migrations.
+* **Modular Architecture:** Clean folder structure with dedicated routers for users, diseases, and schemes.
 
-- load trained model artifacts
-- accept uploaded images
-- preprocess inputs
-- return predictions and confidence scores
+## 🛠️ Tech Stack
+* **Framework:** FastAPI
+* **Database:** PostgreSQL & SQLAlchemy (ORM)
+* **Migrations:** Alembic
+* **Language:** Python 3.13
 
-Suggested future structure:
-
-```text
-backend/
-├── app/
-│   ├── api/
-│   ├── core/
-│   ├── schemas/
-│   └── services/
-└── tests/
-```

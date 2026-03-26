@@ -1,6 +1,9 @@
+import { useRef, useState } from 'react';
 import { motion } from 'motion/react';
-import { BrainCircuit, Upload, Camera, Sprout, Shield, Sparkles, ArrowRight, Zap } from 'lucide-react';
+import { BrainCircuit, Upload, Camera, Sprout, Shield, Sparkles, ArrowRight, Zap, Loader2 } from 'lucide-react';
 import { Plant3D } from '../components/Plant3D';
+import { detectDisease } from '../api';
+import { DetectResponse } from '../types';
 
 const fadeUp = {
   initial: { opacity: 0, y: 24 },
@@ -8,13 +11,53 @@ const fadeUp = {
   transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] }
 };
 
-export const HomeScreen = () => {
+interface HomeScreenProps {
+  onAnalyzeComplete?: (result: DetectResponse) => void;
+}
+
+export const HomeScreen = ({ onAnalyzeComplete }: HomeScreenProps) => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setIsAnalyzing(true);
+      // Call our Axios API function
+      const result = await detectDisease(file);
+      
+      if (onAnalyzeComplete) {
+        onAnalyzeComplete(result);
+      }
+    } catch (error) {
+      console.error('Failed to detect disease', error);
+      alert('Error analyzing the image. Please ensure the backend is running.');
+    } finally {
+      setIsAnalyzing(false);
+      // Reset input so the same file can be uploaded again
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
   return (
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       className="space-y-10 sm:space-y-14 lg:space-y-16"
     >
+      {/* Hidden file input */}
+      <input 
+        type="file" 
+        accept="image/*" 
+        className="hidden" 
+        ref={fileInputRef}
+        onChange={handleFileUpload}
+      />
+
       {/* ====== HERO SECTION ====== */}
       <section>
         <div className="card-soft overflow-hidden relative">
@@ -61,12 +104,28 @@ export const HomeScreen = () => {
               </motion.p>
               
               <motion.div {...fadeUp} className="flex flex-col sm:flex-row w-full gap-3">
-                <button className="flex-1 py-3.5 sm:py-4 px-6 btn-primary text-sm sm:text-base flex items-center justify-center gap-2.5 group">
-                  <Upload className="w-4 h-4 sm:w-5 sm:h-5 group-hover:scale-110 transition-transform" />
-                  Upload Image
-                  <ArrowRight className="w-3.5 h-3.5 opacity-0 -ml-1 group-hover:opacity-100 group-hover:ml-0 transition-all" />
+                <button 
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isAnalyzing}
+                  className="flex-1 py-3.5 sm:py-4 px-6 btn-primary text-sm sm:text-base flex items-center justify-center gap-2.5 group disabled:opacity-70"
+                >
+                  {isAnalyzing ? (
+                    <>
+                      <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
+                      Analyzing...
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="w-4 h-4 sm:w-5 sm:h-5 group-hover:scale-110 transition-transform" />
+                      Upload Image
+                      <ArrowRight className="w-3.5 h-3.5 opacity-0 -ml-1 group-hover:opacity-100 group-hover:ml-0 transition-all" />
+                    </>
+                  )}
                 </button>
-                <button className="flex-1 py-3.5 sm:py-4 px-6 glass text-on-surface font-semibold text-sm sm:text-base rounded-2xl flex items-center justify-center gap-2.5 hover:bg-white/80 transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.98] group">
+                <button 
+                  disabled={isAnalyzing}
+                  className="flex-1 py-3.5 sm:py-4 px-6 glass text-on-surface font-semibold text-sm sm:text-base rounded-2xl flex items-center justify-center gap-2.5 hover:bg-white/80 transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.98] group disabled:opacity-70"
+                >
                   <Camera className="w-4 h-4 sm:w-5 sm:h-5 group-hover:text-primary transition-colors" />
                   Use Camera
                 </button>
