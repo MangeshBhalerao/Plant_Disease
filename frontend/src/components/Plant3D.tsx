@@ -69,18 +69,14 @@ export const Plant3D = () => {
         <OrganicShape />
         
         <LeafShape position={[-2, 1, -1]} rotation={[0.5, 0.2, 0.1]} scale={0.8} color="#22c55e" />
-        <LeafShape position={[2, -1, 1]} rotation={[-0.3, 0.5, 0.4]} scale={0.6} color="#4ade80" />
+        
         <LeafShape position={[-1, -2, 0]} rotation={[0.1, -0.4, -0.2]} scale={0.5} color="#059669" />
         
         {/* Changed from 'preset="forest"' to a custom Farm HDRI to explicitly reflect an open farm environment */}
         <Environment files="https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/farm_field_1k.hdr" />
       </Canvas>
       
-      <div className="absolute bottom-2 sm:bottom-3 left-1/2 -translate-x-1/2 pointer-events-none">
-        <div className="glass px-3 py-1.5 rounded-full text-[9px] font-semibold text-on-surface-muted uppercase tracking-[0.12em]">
-          Interactive 3D
-        </div>
-      </div>
+      
     </div>
   );
 };

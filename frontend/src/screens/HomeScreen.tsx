@@ -86,21 +86,7 @@ export const HomeScreen = ({ onAnalyzeComplete }: HomeScreenProps) => {
             <div className="h-[280px] sm:h-[340px] lg:h-auto w-full relative overflow-hidden bg-gradient-to-br from-surface-container to-white">
               <Plant3D />
               
-              {/* Floating AI badge */}
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.85 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.4, duration: 0.4 }}
-                className="absolute top-4 sm:top-5 left-4 sm:left-5 glass px-3 py-2 rounded-xl flex items-center gap-2.5 z-20"
-              >
-                <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Sparkles className="w-3.5 h-3.5 text-primary animate-pulse-soft" />
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold text-primary uppercase tracking-wider leading-none">Next-Gen AI</p>
-                  <p className="text-[9px] text-on-surface-muted font-medium leading-none mt-0.5">Neural Engine v4.2</p>
-                </div>
-              </motion.div>
+              
             </div>
             
             {/* Content */}
