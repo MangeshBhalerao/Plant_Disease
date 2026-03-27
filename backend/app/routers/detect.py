@@ -44,18 +44,18 @@ def detect_disease(
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Image analysis failed: {exc}") from exc
 
-    try:
-        if cloudinary_is_configured():
+    stored_image_path = f"uploaded_images/{saved_name}"
+    cloudinary_upload_succeeded = False
+
+    if cloudinary_is_configured():
+        try:
             stored_image_path = upload_image_to_cloudinary(file_path, public_id=Path(saved_name).stem)
-        else:
+            cloudinary_upload_succeeded = True
+        except Exception:
+            # Keep local storage as a safe fallback when Cloudinary is unavailable or misconfigured.
             stored_image_path = f"uploaded_images/{saved_name}"
-    except httpx.HTTPError as exc:
-        raise HTTPException(status_code=502, detail=f"Cloudinary upload failed: {exc}") from exc
-    except Exception as exc:
-        raise HTTPException(status_code=500, detail=f"Image upload failed: {exc}") from exc
-    finally:
-        if cloudinary_is_configured() and file_path.exists():
-            file_path.unlink(missing_ok=True)
+    if cloudinary_upload_succeeded and file_path.exists():
+        file_path.unlink(missing_ok=True)
 
     disease_in_db = (
         db.query(models.Disease)
