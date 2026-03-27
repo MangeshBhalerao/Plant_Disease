@@ -31,6 +31,8 @@ class Detection(Base):
     scheme_id = Column(Integer, ForeignKey("schemes.id", ondelete="SET NULL"), nullable=True)
     image_path = Column(Text, nullable=False)
     confidence = Column(Float)
+    reasoning = Column(Text, nullable=True)
+    model_name_used = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     owner = relationship("User", back_populates="detections")

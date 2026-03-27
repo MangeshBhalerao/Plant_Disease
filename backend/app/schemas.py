@@ -85,6 +85,7 @@ class DetectionResponse(BaseModel):
     confidence: float
     remedy: str
     image_path: str
+    reasoning: str
 
 
 class DetectionHistoryResponse(BaseModel):

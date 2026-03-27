@@ -153,7 +153,7 @@ export const ResultsScreen = ({ result, onNewScan, onAnalyzeComplete }: ResultsS
 
             {/* Causes & Action Plan */}
             <div className="grid grid-cols-1 gap-3 sm:gap-4 flex-grow">
-               <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-primary/5 to-secondary/3 border border-primary/8 h-full">
+              <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-primary/5 to-secondary/3 border border-primary/8 h-full">
                 <div className="flex items-center gap-2.5 mb-3 sm:mb-4">
                   <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
                     <Stethoscope className="w-4 h-4 text-primary" />
@@ -163,6 +163,19 @@ export const ResultsScreen = ({ result, onNewScan, onAnalyzeComplete }: ResultsS
                 
                 <p className="text-sm text-on-surface-variant leading-relaxed">
                   {result.remedy || 'No recommended actions found for this issue.'}
+                </p>
+              </div>
+
+              <div className="p-4 sm:p-5 rounded-2xl bg-white/70 border border-outline-variant/60 h-full">
+                <div className="flex items-center gap-2.5 mb-3 sm:mb-4">
+                  <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <Sprout className="w-4 h-4 text-primary" />
+                  </div>
+                  <p className="font-headline font-bold text-sm sm:text-base text-on-surface">AI Reasoning</p>
+                </div>
+
+                <p className="text-sm text-on-surface-variant leading-relaxed">
+                  {result.reasoning || 'No reasoning available yet.'}
                 </p>
               </div>
             </div>
