@@ -1,7 +1,10 @@
 import axios from 'axios';
 import { DetectResponse, DetectionHistoryItem } from './types';
 
-const API_URL = (import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000').replace(/\/$/, '');
+const configuredApiUrl = import.meta.env.VITE_API_URL?.trim();
+const productionFallbackApiUrl = 'https://agrisense-2ens.onrender.com';
+const defaultApiUrl = import.meta.env.PROD ? productionFallbackApiUrl : 'http://127.0.0.1:8000';
+const API_URL = (configuredApiUrl || defaultApiUrl).replace(/\/$/, '');
 
 export const api = axios.create({
   baseURL: API_URL,

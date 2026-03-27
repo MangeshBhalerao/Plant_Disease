@@ -1,20 +1,23 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# AgriSense Frontend
 
-# Run and deploy your AI Studio app
+Vite + React frontend for AgriSense plant disease detection.
 
-This contains everything you need to run your app locally.
+## Local Development
 
-View your app in AI Studio: https://ai.studio/apps/4a375386-5085-4885-a6ab-9c184f2c0bed
+1. Install dependencies.
+2. Create a local env file from [.env.example](.env.example).
+3. Set VITE_API_URL to your backend URL, for example http://127.0.0.1:8000.
+4. Run the development server.
 
-## Run Locally
+## Production Deployment
 
-**Prerequisites:**  Node.js
+This frontend is deployed on Vercel and expects a reachable backend URL.
 
+Required Vercel environment variable:
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+- VITE_API_URL=https://agrisense-2ens.onrender.com
+
+Important:
+
+- Vite injects VITE_API_URL at build time.
+- After changing VITE_API_URL in Vercel, trigger a new Production Redeploy so the new value is included in the JS bundle.
