@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 
 from .. import models, schemas
 from ..ai_model import analyze_plant_image
+from ..cloudinary_service import cloudinary_is_configured, upload_image_to_cloudinary
 from ..config import settings
 from ..database import get_db
 from ..utilis import hash_password
@@ -42,6 +43,19 @@ def detect_disease(
         raise HTTPException(status_code=502, detail=f"Groq API request failed: {exc}") from exc
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Image analysis failed: {exc}") from exc
+
+    try:
+        if cloudinary_is_configured():
+            stored_image_path = upload_image_to_cloudinary(file_path, public_id=Path(saved_name).stem)
+        else:
+            stored_image_path = f"uploaded_images/{saved_name}"
+    except httpx.HTTPError as exc:
+        raise HTTPException(status_code=502, detail=f"Cloudinary upload failed: {exc}") from exc
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Image upload failed: {exc}") from exc
+    finally:
+        if cloudinary_is_configured() and file_path.exists():
+            file_path.unlink(missing_ok=True)
 
     disease_in_db = (
         db.query(models.Disease)
@@ -88,7 +102,7 @@ def detect_disease(
         disease_id=disease_in_db.id,
         remedy_id=remedy_entry.id if remedy_entry else None,
         scheme_id=None,
-        image_path=f"uploaded_images/{saved_name}",
+        image_path=stored_image_path,
         confidence=float(model_result["confidence"]),
         reasoning=model_result["reasoning"],
         model_name_used=settings.model_name,
@@ -105,7 +119,7 @@ def detect_disease(
         "disease": disease_in_db.name,
         "confidence": model_result["confidence"],
         "remedy": remedy_text,
-        "image_path": f"uploaded_images/{saved_name}",
+        "image_path": stored_image_path,
         "reasoning": model_result["reasoning"],
     }
 

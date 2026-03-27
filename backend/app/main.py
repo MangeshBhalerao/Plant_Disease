@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
+from .config import get_cors_origins
 from .routers import auth, detect, disease, schemes, users
 
 app = FastAPI(title="Agrisense API", version="1.0.0")
@@ -15,12 +16,7 @@ app.mount("/uploaded_images", StaticFiles(directory=str(uploaded_images_dir)), n
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-    ],
+    allow_origins=get_cors_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
