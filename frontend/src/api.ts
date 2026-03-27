@@ -1,10 +1,30 @@
 import axios from 'axios';
 import { DetectResponse, DetectionHistoryItem } from './types';
 
-const configuredApiUrl = import.meta.env.VITE_API_URL?.trim();
 const productionFallbackApiUrl = 'https://agrisense-2ens.onrender.com';
 const defaultApiUrl = import.meta.env.PROD ? productionFallbackApiUrl : 'http://127.0.0.1:8000';
-const API_URL = (configuredApiUrl || defaultApiUrl).replace(/\/$/, '');
+
+const normalizeApiUrl = (rawUrl?: string) => {
+  const value = rawUrl?.trim();
+  if (!value) {
+    return '';
+  }
+
+  if (value.startsWith('http://') || value.startsWith('https://')) {
+    return value.replace(/\/$/, '');
+  }
+
+  // Accept host-style values (for example, agrisense-2ens.onrender.com) and force HTTPS.
+  if (value.includes('.')) {
+    return `https://${value}`.replace(/\/$/, '');
+  }
+
+  // If the value is not a valid URL/host, ignore it and use the safe default.
+  return '';
+};
+
+const configuredApiUrl = normalizeApiUrl(import.meta.env.VITE_API_URL);
+const API_URL = configuredApiUrl || defaultApiUrl;
 
 export const api = axios.create({
   baseURL: API_URL,
