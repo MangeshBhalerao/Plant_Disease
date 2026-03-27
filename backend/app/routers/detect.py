@@ -1,77 +1,88 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
-from fastapi.security import OAuth2PasswordRequestForm
-from .. import oauth2 
-from app import utilis
-from ..import models, schemas
-from ..database import get_db
-from fastapi import File, UploadFile 
-import shutil
 import os
-import traceback 
+import shutil
+from pathlib import Path
+from uuid import uuid4
+
+from fastapi import APIRouter, Depends, File, UploadFile
+from sqlalchemy.orm import Session
+
+from .. import models, schemas
+from ..database import get_db
+from ..utilis import hash_password
 
 
 router = APIRouter(
     prefix="/detect",
-    tags=['detect'],
-) 
+    tags=["detect"],
+)
 
-UPLOAD_DIR = "uploaded_images"
+UPLOAD_DIR = Path(__file__).resolve().parents[2] / "uploaded_images"
 
-# Temporary function to simulate AI detection
-def mock_ai_prediction(image_path):
-    # Simulating an AI detection
-    # Returns: (Disease Name, Confidence Score)
-    return "Wheat Rust", 95
+
+def mock_ai_prediction(image_path: Path) -> tuple[str, float]:
+    return "Wheat Rust", 95.0
 
 
 @router.post("/", response_model=schemas.DetectionResponse)
-# Updated /detect endpoint
 def detect_disease(
-    file: UploadFile = File(...), 
-    location: str = "Unknown",
-    db: Session = Depends(get_db)
-    # current_user: int = Depends(oauth2.get_current_user) # Disabled for testing
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
 ):
-    # A. Save File (Keep your existing code)
-    file_path = f"{UPLOAD_DIR}/{file.filename}"
-    
-    # Ensure directory exists
     os.makedirs(UPLOAD_DIR, exist_ok=True)
-    
+
+    suffix = Path(file.filename or "upload.jpg").suffix or ".jpg"
+    saved_name = f"{uuid4()}{suffix}"
+    file_path = UPLOAD_DIR / saved_name
+
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
-    # B. Run AI (Mock) -> It finds "Wheat Rust"
     detected_name, confidence = mock_ai_prediction(file_path)
-
-    # C. FETCH REMEDIES FROM DB (The New Part!)
     disease_in_db = db.query(models.Disease).filter(models.Disease.name == detected_name).first()
-    
+
+    disease_name = disease_in_db.name if disease_in_db else detected_name
     remedy_text = "No remedy found"
     if disease_in_db and disease_in_db.remedies:
         remedy_text = disease_in_db.remedies[0].description
 
+    first_user = db.query(models.User).order_by(models.User.id.asc()).first()
+    if not first_user:
+        first_user = models.User(
+            email="guest@agrisense.local",
+            hashed_password=hash_password("guest-user"),
+            full_name="Guest User",
+            location="Local Device",
+        )
+        db.add(first_user)
+        db.commit()
+        db.refresh(first_user)
+
     new_detection = models.Detection(
-        user_id=1,  # Hardcoded for now until frontend login is complete
-        image_path=str(file_path),
-        disease_name=disease_in_db.name if disease_in_db else detected_name,
+        user_id=first_user.id,
+        image_path=f"uploaded_images/{saved_name}",
+        disease_name=disease_name,
         confidence=float(confidence),
-        remedy=remedy_text
+        remedy=remedy_text,
     )
-    
-    # Actually save it to Postgres (wrap in try-catch in case user 1 doesn't exist)
     try:
         db.add(new_detection)
         db.commit()
         db.refresh(new_detection)
-    except Exception as e:
+    except Exception:
         db.rollback()
-        print(f"Failed to save detection (user 1 might not exist): {e}")
 
     return {
-        "disease": disease_in_db.name,
+        "disease": disease_name,
         "confidence": confidence,
-        "remedy": remedy_text, # <--- Use the variable we just created
-        "image_path": str(file_path)
+        "remedy": remedy_text,
+        "image_path": f"uploaded_images/{saved_name}",
     }
+
+
+@router.get("/history", response_model=list[schemas.DetectionHistoryResponse])
+def get_detection_history(db: Session = Depends(get_db)):
+    return (
+        db.query(models.Detection)
+        .order_by(models.Detection.created_at.desc())
+        .all()
+    )

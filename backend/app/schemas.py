@@ -45,7 +45,7 @@ class SchemeOut(SchemeBase):
     id : int
 
     class Config:
-        from_attribute = True
+        from_attributes = True
 
 
 
@@ -86,4 +86,14 @@ class DetectionResponse(BaseModel):
     remedy: str
     image_path: str
 
-    
+
+class DetectionHistoryResponse(BaseModel):
+    id: int
+    disease_name: str
+    confidence: Optional[float] = None
+    remedy: Optional[str] = None
+    image_path: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True

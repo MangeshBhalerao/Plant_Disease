@@ -5,37 +5,36 @@ import {
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { cn } from '../utils/cn';
-import { Screen } from '../types';
 
 interface BottomNavProps {
-  currentScreen: Screen;
-  setScreen: (s: Screen) => void;
+  currentPath: string;
+  onNavigate: (path: string) => void;
 }
 
-export const BottomNav = ({ currentScreen, setScreen }: BottomNavProps) => {
+export const BottomNav = ({ currentPath, onNavigate }: BottomNavProps) => {
   const navItems = [
-    { id: 'home' as Screen, icon: HomeIcon, label: 'Home' },
-    { id: 'results' as Screen, icon: Scan, label: 'Diagnose' },
-    { id: 'history' as Screen, icon: Clock, label: 'History' },
+    { path: '/', icon: HomeIcon, label: 'Home' },
+    { path: '/results', icon: Scan, label: 'Diagnose' },
+    { path: '/history', icon: Clock, label: 'History' },
   ];
 
   return (
     <nav className="fixed bottom-0 left-0 w-full flex justify-center px-4 pb-4 z-50">
       <div className="glass-strong rounded-2xl px-3 py-2 flex justify-around items-center w-full max-w-sm">
         {navItems.map((item) => {
-          const isActive = currentScreen === item.id;
-          const isCenter = item.id === 'results';
+          const isActive = currentPath === item.path;
+          const isCenter = item.path === '/results';
 
           if (isCenter) {
             return (
               <motion.button
-                key={item.id}
-                onClick={() => setScreen('results')}
+                key={item.path}
+                onClick={() => onNavigate(item.path)}
                 whileHover={{ scale: 1.06 }}
                 whileTap={{ scale: 0.93 }}
                 className={cn(
                   "flex flex-col items-center justify-center rounded-xl px-5 py-2.5 transition-all duration-200",
-                  currentScreen === 'results'
+                  currentPath === '/results'
                     ? "btn-primary glow-green"
                     : "bg-gradient-to-r from-primary to-secondary text-white opacity-85 hover:opacity-100 shadow-md shadow-primary/15"
                 )}
@@ -48,8 +47,8 @@ export const BottomNav = ({ currentScreen, setScreen }: BottomNavProps) => {
 
           return (
             <motion.button
-              key={item.id}
-              onClick={() => setScreen(item.id)}
+              key={item.path}
+              onClick={() => onNavigate(item.path)}
               whileHover={{ scale: 1.06 }}
               whileTap={{ scale: 0.93 }}
               className={cn(

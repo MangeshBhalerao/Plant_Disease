@@ -1,13 +1,12 @@
 import { motion } from 'motion/react';
 import { Sprout, Stethoscope, Clock, Scan, AlertTriangle, CheckCircle } from 'lucide-react';
 import { DetectResponse } from '../types';
+import { buildImageUrl } from '../api';
 
 interface ResultsScreenProps {
   result: DetectResponse | null;
   onNewScan: () => void;
 }
-
-const API_URL = 'http://127.0.0.1:8000'; // Define backend URL
 
 export const ResultsScreen = ({ result, onNewScan }: ResultsScreenProps) => {
   if (!result) {
@@ -31,9 +30,7 @@ export const ResultsScreen = ({ result, onNewScan }: ResultsScreenProps) => {
   
   // Format the image URL so the frontend can load it from the backend server
   // Assumes backend path is "uploaded_images/..." and backend creates a static mount at "/uploaded_images"
-  const imageUrl = result.image_path.startsWith('http') 
-    ? result.image_path 
-    : `${API_URL}/${result.image_path.replace(/\\/g, '/')}`;
+  const imageUrl = buildImageUrl(result.image_path);
 
   return (
     <motion.div 

@@ -1,36 +1,31 @@
-from fastapi import Depends, FastAPI, status, HTTPException
-import traceback 
-from sqlalchemy.orm import Session
-from app import oauth2, schemas
-from app import utilis
-from app.utilis import hash_password
-from . import models
-from .database import engine, get_db
-from fastapi.security import OAuth2PasswordRequestForm
-import shutil
-import os
-from fastapi import File, UploadFile
-from . import oauth2  # Import the new auth file
-from .routers import users ,auth ,detect,schemes,disease
+from pathlib import Path
 
-
-#models.Base.metadata.create_all(bind=engine)
-
-
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
+from .routers import auth, detect, disease, schemes, users
+
 app = FastAPI(title="Agrisense API", version="1.0.0")
 
-app.mount("/uploaded_images", StaticFiles(directory="uploaded_images"), name="uploaded_images")
+uploaded_images_dir = Path(__file__).resolve().parents[1] / "uploaded_images"
+uploaded_images_dir.mkdir(parents=True, exist_ok=True)
+
+app.mount("/uploaded_images", StaticFiles(directory=str(uploaded_images_dir)), name="uploaded_images")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allows all origins (update in production)
+    allow_origins=[
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ],
     allow_credentials=True,
-    allow_methods=["*"],  # Allows all methods
-    allow_headers=["*"],  # Allows all headers
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
+
 
 @app.get("/")
 async def read_root():

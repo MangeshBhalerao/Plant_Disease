@@ -14,24 +14,24 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../utils/cn';
-import { Screen } from '../types';
 
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
-  onNavigate: (screen: Screen) => void;
+  currentPath: string;
+  onNavigate: (path: string) => void;
 }
 
 const navItems = [
-  { icon: Home, label: 'Home', screen: 'home' as Screen },
-  { icon: Scan, label: 'Diagnose', screen: 'results' as Screen },
-  { icon: Sprout, label: 'My Plants', screen: null },
-  { icon: Clock, label: 'History', screen: 'history' as Screen },
-  { icon: User, label: 'Profile', screen: 'profile' as Screen },
-  { icon: Settings, label: 'Settings', screen: null },
+  { icon: Home, label: 'Home', path: '/' },
+  { icon: Scan, label: 'Diagnose', path: '/results' },
+  { icon: Sprout, label: 'My Plants', path: null },
+  { icon: Clock, label: 'History', path: '/history' },
+  { icon: User, label: 'Profile', path: '/profile' },
+  { icon: Settings, label: 'Settings', path: null },
 ];
 
-export const Sidebar = ({ isOpen, onClose, onNavigate }: SidebarProps) => {
+export const Sidebar = ({ isOpen, onClose, currentPath, onNavigate }: SidebarProps) => {
   return (
     <AnimatePresence>
       {isOpen && (
@@ -98,15 +98,25 @@ export const Sidebar = ({ isOpen, onClose, onNavigate }: SidebarProps) => {
                 <motion.button
                   key={item.label}
                   onClick={() => {
-                    if (item.screen) {
-                      onNavigate(item.screen);
+                    if (item.path) {
+                      onNavigate(item.path);
                     }
                   }}
                   whileTap={{ scale: 0.98 }}
-                  className="flex items-center justify-between px-3 py-3 text-on-surface-variant hover:text-on-surface hover:bg-primary/5 rounded-xl font-medium text-sm text-left transition-all group"
+                  className={cn(
+                    "flex items-center justify-between px-3 py-3 rounded-xl font-medium text-sm text-left transition-all group",
+                    currentPath === item.path
+                      ? "bg-primary/8 text-primary"
+                      : "text-on-surface-variant hover:text-on-surface hover:bg-primary/5"
+                  )}
                 >
                   <div className="flex items-center gap-3">
-                    <item.icon className="w-[18px] h-[18px] text-on-surface-muted group-hover:text-primary transition-colors" />
+                    <item.icon className={cn(
+                      "w-[18px] h-[18px] transition-colors",
+                      currentPath === item.path
+                        ? "text-primary"
+                        : "text-on-surface-muted group-hover:text-primary"
+                    )} />
                     <span>{item.label}</span>
                   </div>
                   <ChevronRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-40 transition-opacity" />

@@ -17,14 +17,13 @@ const OrganicShape = () => {
     <Float speed={1.5} rotationIntensity={0.8} floatIntensity={1.5}>
       <Sphere ref={meshRef} args={[1, 64, 64]} scale={1.5}>
         <MeshDistortMaterial
-          color="#22c55e"
-          emissive="#16a34a"
-          emissiveIntensity={0.1}
+          color="#ffffff" // pure white base to show the reflection colors clearly
           speed={2.5}
-          distort={0.35}
-          radius={1}
-          roughness={0.2}
-          metalness={0.15}
+          distort={0.2}
+          radius={0.9}
+          roughness={0} // perfectly smooth mirror
+          metalness={0.94} // perfectly reflective
+          envMapIntensity={2.5} // Boost the reflection of the forest!
         />
       </Sphere>
     </Float>
@@ -43,14 +42,14 @@ const LeafShape = ({ position, rotation, scale = 1, color = '#16a34a' }: {
         <sphereGeometry args={[0.5, 32, 32]} />
         <MeshDistortMaterial
           color={color}
-          emissive={color}
-          emissiveIntensity={0.05}
           speed={1.8}
-          distort={0.25}
+          distort={0.3}
           radius={1}
-          roughness={0.3}
+          roughness={0.05} // Almost perfectly smooth
+          metalness={0.6} // Highly reflective
+          envMapIntensity={2}
           transparent
-          opacity={0.8}
+          opacity={0.9}
         />
       </mesh>
     </Float>
@@ -73,7 +72,8 @@ export const Plant3D = () => {
         <LeafShape position={[2, -1, 1]} rotation={[-0.3, 0.5, 0.4]} scale={0.6} color="#4ade80" />
         <LeafShape position={[-1, -2, 0]} rotation={[0.1, -0.4, -0.2]} scale={0.5} color="#059669" />
         
-        <Environment preset="forest" />
+        {/* Changed from 'preset="forest"' to a custom Farm HDRI to explicitly reflect an open farm environment */}
+        <Environment files="https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/farm_field_1k.hdr" />
       </Canvas>
       
       <div className="absolute bottom-2 sm:bottom-3 left-1/2 -translate-x-1/2 pointer-events-none">
