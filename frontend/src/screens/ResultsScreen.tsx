@@ -1,26 +1,69 @@
+import { useState } from 'react';
 import { motion } from 'motion/react';
 import { Sprout, Stethoscope, Clock, Scan, AlertTriangle, CheckCircle } from 'lucide-react';
+import { CameraCaptureModal } from '../components/CameraCaptureModal';
+import { buildImageUrl, detectDisease } from '../api';
 import { DetectResponse } from '../types';
-import { buildImageUrl } from '../api';
 
 interface ResultsScreenProps {
   result: DetectResponse | null;
   onNewScan: () => void;
+  onAnalyzeComplete?: (result: DetectResponse) => void;
 }
 
-export const ResultsScreen = ({ result, onNewScan }: ResultsScreenProps) => {
+export const ResultsScreen = ({ result, onNewScan, onAnalyzeComplete }: ResultsScreenProps) => {
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+
+  const handleCameraCapture = async (file: File) => {
+    const previewImageUrl = URL.createObjectURL(file);
+
+    try {
+      setIsAnalyzing(true);
+      const nextResult = await detectDisease(file);
+      onAnalyzeComplete?.({
+        ...nextResult,
+        preview_image_url: previewImageUrl,
+      });
+      setIsCameraOpen(false);
+    } catch (error) {
+      URL.revokeObjectURL(previewImageUrl);
+      console.error('Failed to detect disease from camera capture', error);
+      alert('Error analyzing the camera image. Please ensure the backend is running.');
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
   if (!result) {
     return (
-      <div className="flex flex-col items-center justify-center h-[50vh] text-center px-4">
-        <Sprout className="w-16 h-16 text-primary/30 mb-4" />
-        <h2 className="text-xl font-bold font-headline text-on-surface mb-2">No Analysis Found</h2>
-        <p className="text-on-surface-muted text-sm mb-6 max-w-sm">
-          Please upload or take a photo of a leaf to get an instant diagnosis.
-        </p>
-        <button onClick={onNewScan} className="btn-primary px-6 py-3">
-          Start Scan
-        </button>
-      </div>
+      <>
+        <CameraCaptureModal
+          open={isCameraOpen}
+          isSubmitting={isAnalyzing}
+          onClose={() => setIsCameraOpen(false)}
+          onCapture={handleCameraCapture}
+        />
+        <div className="flex flex-col items-center justify-center h-[50vh] text-center px-4">
+          <Sprout className="w-16 h-16 text-primary/30 mb-4" />
+          <h2 className="text-xl font-bold font-headline text-on-surface mb-2">No Analysis Found</h2>
+          <p className="text-on-surface-muted text-sm mb-6 max-w-sm">
+            Please upload or take a photo of a leaf to get an instant diagnosis.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 w-full max-w-sm">
+            <button onClick={onNewScan} className="btn-primary px-6 py-3 flex-1">
+              Start Scan
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsCameraOpen(true)}
+              className="glass px-6 py-3 rounded-2xl flex-1 font-semibold text-on-surface"
+            >
+              Use Camera
+            </button>
+          </div>
+        </div>
+      </>
     );
   }
 
@@ -30,7 +73,7 @@ export const ResultsScreen = ({ result, onNewScan }: ResultsScreenProps) => {
   
   // Format the image URL so the frontend can load it from the backend server
   // Assumes backend path is "uploaded_images/..." and backend creates a static mount at "/uploaded_images"
-  const imageUrl = buildImageUrl(result.image_path);
+  const imageUrl = result.preview_image_url || buildImageUrl(result.image_path);
 
   return (
     <motion.div 

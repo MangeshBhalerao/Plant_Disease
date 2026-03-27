@@ -3,6 +3,7 @@ export interface DetectResponse {
   confidence: number;
   remedy: string;
   image_path: string;
+  preview_image_url?: string;
 }
 
 export interface DetectionHistoryItem {

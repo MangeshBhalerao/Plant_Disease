@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { motion } from 'motion/react';
 import { BrainCircuit, Upload, Camera, Sprout, Shield, Sparkles, ArrowRight, Zap, Loader2 } from 'lucide-react';
+import { CameraCaptureModal } from '../components/CameraCaptureModal';
 import { Plant3D } from '../components/Plant3D';
 import { detectDisease } from '../api';
 import { DetectResponse } from '../types';
@@ -18,29 +19,38 @@ interface HomeScreenProps {
 export const HomeScreen = ({ onAnalyzeComplete }: HomeScreenProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
+
+  const handleAnalyzeFile = async (file: File) => {
+    const previewImageUrl = URL.createObjectURL(file);
+
+    try {
+      setIsAnalyzing(true);
+      const result = await detectDisease(file);
+
+      if (onAnalyzeComplete) {
+        onAnalyzeComplete({
+          ...result,
+          preview_image_url: previewImageUrl,
+        });
+      }
+    } catch (error) {
+      URL.revokeObjectURL(previewImageUrl);
+      console.error('Failed to detect disease', error);
+      alert('Error analyzing the image. Please ensure the backend is running.');
+    } finally {
+      setIsAnalyzing(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    try {
-      setIsAnalyzing(true);
-      // Call our Axios API function
-      const result = await detectDisease(file);
-      
-      if (onAnalyzeComplete) {
-        onAnalyzeComplete(result);
-      }
-    } catch (error) {
-      console.error('Failed to detect disease', error);
-      alert('Error analyzing the image. Please ensure the backend is running.');
-    } finally {
-      setIsAnalyzing(false);
-      // Reset input so the same file can be uploaded again
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-    }
+    await handleAnalyzeFile(file);
   };
 
   return (
@@ -49,6 +59,16 @@ export const HomeScreen = ({ onAnalyzeComplete }: HomeScreenProps) => {
       animate={{ opacity: 1 }}
       className="space-y-10 sm:space-y-14 lg:space-y-16"
     >
+      <CameraCaptureModal
+        open={isCameraOpen}
+        isSubmitting={isAnalyzing}
+        onClose={() => setIsCameraOpen(false)}
+        onCapture={async (file) => {
+          await handleAnalyzeFile(file);
+          setIsCameraOpen(false);
+        }}
+      />
+
       {/* Hidden file input */}
       <input 
         type="file" 
@@ -123,6 +143,8 @@ export const HomeScreen = ({ onAnalyzeComplete }: HomeScreenProps) => {
                   )}
                 </button>
                 <button 
+                  type="button"
+                  onClick={() => setIsCameraOpen(true)}
                   disabled={isAnalyzing}
                   className="flex-1 py-3.5 sm:py-4 px-6 glass text-on-surface font-semibold text-sm sm:text-base rounded-2xl flex items-center justify-center gap-2.5 hover:bg-white/80 transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.98] group disabled:opacity-70"
                 >

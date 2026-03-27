@@ -3,7 +3,7 @@ import shutil
 from pathlib import Path
 from uuid import uuid4
 
-from fastapi import APIRouter, Depends, File, UploadFile
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from sqlalchemy.orm import Session
 
 from .. import models, schemas
@@ -40,10 +40,14 @@ def detect_disease(
     detected_name, confidence = mock_ai_prediction(file_path)
     disease_in_db = db.query(models.Disease).filter(models.Disease.name == detected_name).first()
 
-    disease_name = disease_in_db.name if disease_in_db else detected_name
-    remedy_text = "No remedy found"
-    if disease_in_db and disease_in_db.remedies:
-        remedy_text = disease_in_db.remedies[0].description
+    if not disease_in_db:
+        disease_in_db = models.Disease(name=detected_name, crop_type="Unknown")
+        db.add(disease_in_db)
+        db.commit()
+        db.refresh(disease_in_db)
+
+    remedy_entry = disease_in_db.remedies[0] if disease_in_db.remedies else None
+    remedy_text = remedy_entry.description if remedy_entry else "No remedy found"
 
     first_user = db.query(models.User).order_by(models.User.id.asc()).first()
     if not first_user:
@@ -59,20 +63,22 @@ def detect_disease(
 
     new_detection = models.Detection(
         user_id=first_user.id,
+        disease_id=disease_in_db.id,
+        remedy_id=remedy_entry.id if remedy_entry else None,
+        scheme_id=None,
         image_path=f"uploaded_images/{saved_name}",
-        disease_name=disease_name,
         confidence=float(confidence),
-        remedy=remedy_text,
     )
     try:
         db.add(new_detection)
         db.commit()
         db.refresh(new_detection)
-    except Exception:
+    except Exception as exc:
         db.rollback()
+        raise HTTPException(status_code=500, detail=f"Failed to save detection in database: {exc}") from exc
 
     return {
-        "disease": disease_name,
+        "disease": disease_in_db.name,
         "confidence": confidence,
         "remedy": remedy_text,
         "image_path": f"uploaded_images/{saved_name}",
@@ -81,8 +87,19 @@ def detect_disease(
 
 @router.get("/history", response_model=list[schemas.DetectionHistoryResponse])
 def get_detection_history(db: Session = Depends(get_db)):
-    return (
+    rows = (
         db.query(models.Detection)
         .order_by(models.Detection.created_at.desc())
         .all()
     )
+    return [
+        {
+            "id": row.id,
+            "disease_name": row.disease.name if row.disease else "Unknown",
+            "confidence": row.confidence,
+            "remedy": row.remedy_entry.description if row.remedy_entry else None,
+            "image_path": row.image_path,
+            "created_at": row.created_at,
+        }
+        for row in rows
+    ]

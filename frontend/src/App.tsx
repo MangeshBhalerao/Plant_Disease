@@ -33,12 +33,18 @@ export default function App() {
   });
 
   const handleAnalyzeComplete = (result: DetectResponse) => {
+    if (analysisResult?.preview_image_url?.startsWith('blob:') && analysisResult.preview_image_url !== result.preview_image_url) {
+      URL.revokeObjectURL(analysisResult.preview_image_url);
+    }
     setAnalysisResult(result);
     sessionStorage.setItem('last-detection-result', JSON.stringify(result));
     navigate('/results');
   };
 
   const handleNewScan = () => {
+    if (analysisResult?.preview_image_url?.startsWith('blob:')) {
+      URL.revokeObjectURL(analysisResult.preview_image_url);
+    }
     setAnalysisResult(null);
     sessionStorage.removeItem('last-detection-result');
     navigate('/');
@@ -154,7 +160,17 @@ export default function App() {
         <AnimatePresence mode="wait">
           <Routes>
             <Route path="/" element={<HomeScreen key="home" onAnalyzeComplete={handleAnalyzeComplete} />} />
-            <Route path="/results" element={<ResultsScreen key="results" result={analysisResult} onNewScan={handleNewScan} />} />
+            <Route
+              path="/results"
+              element={
+                <ResultsScreen
+                  key="results"
+                  result={analysisResult}
+                  onNewScan={handleNewScan}
+                  onAnalyzeComplete={handleAnalyzeComplete}
+                />
+              }
+            />
             <Route path="/history" element={<HistoryScreen key="history" />} />
             <Route path="/profile" element={<ProfileScreen key="profile" onBack={() => navigate('/')} />} />
             <Route path="*" element={<Navigate to="/" replace />} />

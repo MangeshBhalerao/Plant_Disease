@@ -1,7 +1,9 @@
-from .database import Base
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, Text, TIMESTAMP , Float, DateTime
-from sqlalchemy.orm import relationship
 from datetime import datetime
+
+from sqlalchemy import Column, DateTime, Float, ForeignKey, Integer, String, Text, TIMESTAMP
+from sqlalchemy.orm import relationship
+
+from .database import Base
 
 class User(Base):
     __tablename__ = "users"
@@ -17,25 +19,32 @@ class User(Base):
     
 
     detections = relationship("Detection", back_populates="owner")
-    
-    
 
 
 class Detection(Base):
     __tablename__ = "detections"
 
     id = Column(Integer, primary_key=True, nullable=False)
-    user_id = Column(Integer, ForeignKey(
-        "users.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    disease_id = Column(Integer, ForeignKey("diseases.id", ondelete="RESTRICT"), nullable=False)
+    remedy_id = Column(Integer, ForeignKey("remedies.id", ondelete="SET NULL"), nullable=True)
+    scheme_id = Column(Integer, ForeignKey("schemes.id", ondelete="SET NULL"), nullable=True)
     image_path = Column(Text, nullable=False)
-    disease_name = Column(String, nullable=False)
     confidence = Column(Float)
-    remedy = Column(String)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     owner = relationship("User", back_populates="detections")
+    disease = relationship("Disease", back_populates="detections")
+    remedy_entry = relationship("Remedy", back_populates="detections")
+    scheme = relationship("Scheme", back_populates="detections")
 
+    @property
+    def disease_name(self):
+        return self.disease.name if self.disease else None
 
+    @property
+    def remedy(self):
+        return self.remedy_entry.description if self.remedy_entry else None
 
 
 
@@ -48,6 +57,8 @@ class Scheme(Base):
     link = Column(String, nullable=False)           # e.g., "https://pmkisan.gov.in"
     image_url = Column(String, nullable=True)       # Optional logo/image
 
+    detections = relationship("Detection", back_populates="scheme")
+
 
 
 class Disease(Base):
@@ -58,6 +69,7 @@ class Disease(Base):
     crop_type = Column(String , nullable=False)
 
     remedies = relationship("Remedy", back_populates="disease")
+    detections = relationship("Detection", back_populates="disease")
 
 
 class Remedy(Base):
@@ -69,6 +81,7 @@ class Remedy(Base):
     description = Column(String, nullable=False)
 
     disease = relationship("Disease", back_populates="remedies")
+    detections = relationship("Detection", back_populates="remedy_entry")
 
 
 
