@@ -138,6 +138,8 @@ def get_detection_history(db: Session = Depends(get_db)):
             "confidence": row.confidence,
             "remedy": row.remedy_entry.description if row.remedy_entry else None,
             "image_path": row.image_path,
+            "reasoning": row.reasoning,
+            "model_name_used": row.model_name_used,
             "created_at": row.created_at,
         }
         for row in rows

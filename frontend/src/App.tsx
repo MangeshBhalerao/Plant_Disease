@@ -13,7 +13,7 @@ import { HomeScreen } from './screens/HomeScreen';
 import { ResultsScreen } from './screens/ResultsScreen';
 import { HistoryScreen } from './screens/HistoryScreen';
 import { ProfileScreen } from './screens/ProfileScreen';
-import { DetectResponse } from './types';
+import { DetectResponse, DetectionHistoryItem } from './types';
 import { cn } from './utils/cn';
 
 const desktopNavItems = [
@@ -48,6 +48,24 @@ export default function App() {
     setAnalysisResult(null);
     sessionStorage.removeItem('last-detection-result');
     navigate('/');
+  };
+
+  const handleOpenHistoryResult = (item: DetectionHistoryItem) => {
+    if (analysisResult?.preview_image_url?.startsWith('blob:')) {
+      URL.revokeObjectURL(analysisResult.preview_image_url);
+    }
+
+    const restoredResult: DetectResponse = {
+      disease: item.disease_name,
+      confidence: item.confidence ?? 0,
+      remedy: item.remedy ?? 'No recommended actions found for this issue.',
+      image_path: item.image_path,
+      reasoning: item.reasoning ?? 'No reasoning available for this historical scan.',
+    };
+
+    setAnalysisResult(restoredResult);
+    sessionStorage.setItem('last-detection-result', JSON.stringify(restoredResult));
+    navigate('/results');
   };
 
   return (
@@ -171,7 +189,7 @@ export default function App() {
                 />
               }
             />
-            <Route path="/history" element={<HistoryScreen key="history" />} />
+            <Route path="/history" element={<HistoryScreen key="history" onOpenResult={handleOpenHistoryResult} />} />
             <Route path="/profile" element={<ProfileScreen key="profile" onBack={() => navigate('/')} />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

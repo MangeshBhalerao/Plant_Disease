@@ -151,9 +151,9 @@ export const HomeScreen = ({ onAnalyzeComplete }: HomeScreenProps) => {
         className="grid grid-cols-2 sm:grid-cols-4 gap-3"
       >
         {[
-          { value: '500+', label: 'Diseases', icon: Zap },
-          { value: '98.4%', label: 'Accuracy', icon: Shield },
-          { value: '2M+', label: 'Samples', icon: BrainCircuit },
+          { value: '300+', label: 'Diseases', icon: Zap },
+          { value: '90%', label: 'Accuracy', icon: Shield },
+          { value: '500k+', label: 'Samples', icon: BrainCircuit },
           { value: '<2s', label: 'Results', icon: Sparkles },
         ].map((stat, i) => (
           <motion.div 

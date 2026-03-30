@@ -94,6 +94,8 @@ class DetectionHistoryResponse(BaseModel):
     confidence: Optional[float] = None
     remedy: Optional[str] = None
     image_path: str
+    reasoning: Optional[str] = None
+    model_name_used: Optional[str] = None
     created_at: datetime
 
     class Config:

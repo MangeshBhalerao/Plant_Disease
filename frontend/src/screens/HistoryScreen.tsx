@@ -5,7 +5,13 @@ import { buildImageUrl, getDetectionHistory } from '../api';
 import { DetectionHistoryItem } from '../types';
 import { cn } from '../utils/cn';
 
-export const HistoryScreen = () => {
+interface HistoryScreenProps {
+  onOpenResult?: (item: DetectionHistoryItem) => void;
+}
+
+const historyImageFallback = 'https://images.unsplash.com/photo-1591857177580-dc82b9ac4e17?auto=format&fit=crop&q=80&w=1200';
+
+export const HistoryScreen = ({ onOpenResult }: HistoryScreenProps) => {
   const [filter, setFilter] = useState('All Scans');
   const [historyItems, setHistoryItems] = useState<DetectionHistoryItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -112,14 +118,16 @@ export const HistoryScreen = () => {
           const imageUrl = buildImageUrl(item.image_path);
 
           return (
-            <motion.div
+            <motion.button
               key={item.id}
+              type="button"
+              onClick={() => onOpenResult?.(item)}
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.06 }}
               whileHover={{ y: -3 }}
               whileTap={{ scale: 0.99 }}
-              className="card-soft p-3.5 sm:p-4 flex gap-3.5 group cursor-pointer"
+              className="card-soft p-3.5 sm:p-4 flex gap-3.5 group cursor-pointer text-left w-full"
             >
               <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl sm:rounded-2xl overflow-hidden shrink-0">
                 <img
@@ -127,6 +135,13 @@ export const HistoryScreen = () => {
                   alt={item.disease_name}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   referrerPolicy="no-referrer"
+                  loading="lazy"
+                  onError={(event) => {
+                    const target = event.currentTarget;
+                    if (target.src !== historyImageFallback) {
+                      target.src = historyImageFallback;
+                    }
+                  }}
                 />
               </div>
 
@@ -160,7 +175,7 @@ export const HistoryScreen = () => {
                   <ChevronRight className="w-3.5 h-3.5 text-on-surface-muted/20 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
                 </div>
               </div>
-            </motion.div>
+            </motion.button>
           );
         })}
       </div>

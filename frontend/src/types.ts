@@ -13,5 +13,7 @@ export interface DetectionHistoryItem {
   confidence: number | null;
   remedy: string | null;
   image_path: string;
+  reasoning?: string | null;
+  model_name_used?: string | null;
   created_at: string;
 }

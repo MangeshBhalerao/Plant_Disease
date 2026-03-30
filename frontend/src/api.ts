@@ -37,11 +37,17 @@ export const buildImageUrl = (imagePath: string) => {
     return '';
   }
 
-  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
-    return imagePath;
+  const normalizedPath = imagePath.trim().replace(/\\/g, '/');
+
+  if (!normalizedPath) {
+    return '';
   }
 
-  return `${API_URL}/${imagePath.replace(/^\/+/, '').replace(/\\/g, '/')}`;
+  if (normalizedPath.startsWith('http://') || normalizedPath.startsWith('https://')) {
+    return normalizedPath;
+  }
+
+  return `${API_URL}/${normalizedPath.replace(/^\/+/, '')}`;
 };
 
 export const detectDisease = async (file: File): Promise<DetectResponse> => {
