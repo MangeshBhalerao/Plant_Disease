@@ -33,12 +33,19 @@ def upload_image_to_cloudinary(image_path: Path, public_id: Optional[str] = None
             "file": (image_path.name, image_file, "image/jpeg"),
         }
         with httpx.Client(timeout=60.0) as client:
-            response = client.post(
-                upload_url,
-                data=data,
-                files=files,
-                auth=(settings.cloudinary_api_key, settings.cloudinary_secret_key),
-            )
+            if settings.cloudinary_upload_preset:
+                response = client.post(
+                    upload_url,
+                    data=data,
+                    files=files,
+                )
+            else:
+                response = client.post(
+                    upload_url,
+                    data=data,
+                    files=files,
+                    auth=(settings.cloudinary_api_key, settings.cloudinary_secret_key),
+                )
 
     response.raise_for_status()
     payload = response.json()
