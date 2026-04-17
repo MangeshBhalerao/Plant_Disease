@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
-import { Sprout, Stethoscope, Clock, Scan, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Sprout, Stethoscope, Clock, Scan, AlertTriangle, CheckCircle, MapPin, Phone, Navigation, Loader2 } from 'lucide-react';
+import axios from 'axios';
 import { CameraCaptureModal } from '../components/CameraCaptureModal';
-import { buildImageUrl, detectDisease } from '../api';
-import { DetectResponse } from '../types';
+import { buildImageUrl, detectDisease, getNearbyStores } from '../api';
+import { DetectResponse, NearbyStore } from '../types';
 
 interface ResultsScreenProps {
   result: DetectResponse | null;
@@ -14,6 +15,14 @@ interface ResultsScreenProps {
 export const ResultsScreen = ({ result, onNewScan, onAnalyzeComplete }: ResultsScreenProps) => {
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isLoadingStores, setIsLoadingStores] = useState(false);
+  const [nearbyStores, setNearbyStores] = useState<NearbyStore[]>([]);
+  const [nearbyStoresMessage, setNearbyStoresMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    setNearbyStores([]);
+    setNearbyStoresMessage(null);
+  }, [result?.disease, result?.remedy, result?.image_path]);
 
   const handleCameraCapture = async (file: File) => {
     const previewImageUrl = URL.createObjectURL(file);
@@ -74,6 +83,51 @@ export const ResultsScreen = ({ result, onNewScan, onAnalyzeComplete }: ResultsS
   // Format the image URL so the frontend can load it from the backend server
   // Assumes backend path is "uploaded_images/..." and backend creates a static mount at "/uploaded_images"
   const imageUrl = result.preview_image_url || buildImageUrl(result.image_path);
+
+  const handleFindNearbyStores = async () => {
+    if (!result) {
+      return;
+    }
+
+    if (!navigator.geolocation) {
+      setNearbyStoresMessage('Location is not supported in this browser.');
+      return;
+    }
+
+    try {
+      setIsLoadingStores(true);
+      setNearbyStoresMessage(null);
+
+      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          timeout: 12000,
+          maximumAge: 300000,
+        });
+      });
+
+      const response = await getNearbyStores({
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+        disease_name: result.disease,
+        remedy: result.remedy,
+      });
+
+      setNearbyStores(response.stores);
+      setNearbyStoresMessage(response.message ?? null);
+    } catch (error) {
+      console.error('Failed to load nearby stores', error);
+      const fallbackMessage = 'We could not fetch nearby treatment stores right now. Please allow location and try again.';
+      const apiMessage = axios.isAxiosError(error)
+        ? typeof error.response?.data?.detail === 'string'
+          ? error.response.data.detail
+          : fallbackMessage
+        : fallbackMessage;
+      setNearbyStoresMessage(apiMessage);
+    } finally {
+      setIsLoadingStores(false);
+    }
+  };
 
   return (
     <motion.div 
@@ -181,6 +235,93 @@ export const ResultsScreen = ({ result, onNewScan, onAnalyzeComplete }: ResultsS
             </div>
           </div>
         </div>
+      </section>
+
+      <section className="card-soft p-5 sm:p-6 lg:p-7">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.15em] text-primary mb-1.5">Nearby Support</p>
+            <h2 className="font-headline text-xl sm:text-2xl font-extrabold tracking-tight text-on-surface">
+              Treatment Stores Near You
+            </h2>
+            <p className="text-sm text-on-surface-muted mt-2 max-w-2xl">
+              Use your location to find nearby agri-input shops, nurseries, or plant treatment stores that may help with this diagnosis.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleFindNearbyStores}
+            disabled={isLoadingStores}
+            className="btn-primary px-5 py-3 rounded-2xl text-sm flex items-center justify-center gap-2 disabled:opacity-70"
+          >
+            {isLoadingStores ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Finding Stores...
+              </>
+            ) : (
+              <>
+                <MapPin className="w-4 h-4" />
+                Find Nearby Stores
+              </>
+            )}
+          </button>
+        </div>
+
+        {nearbyStoresMessage && (
+          <div className="mt-4 rounded-2xl border border-outline-variant/60 bg-surface-container/60 px-4 py-3 text-sm text-on-surface-variant">
+            {nearbyStoresMessage}
+          </div>
+        )}
+
+        {nearbyStores.length > 0 && (
+          <div className="mt-5 grid grid-cols-1 xl:grid-cols-2 gap-4">
+            {nearbyStores.map((store, index) => (
+              <div key={`${store.name}-${index}`} className="rounded-2xl border border-outline-variant/60 bg-white/70 p-4 sm:p-5">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <h3 className="font-headline text-lg font-bold text-on-surface">{store.name}</h3>
+                    <p className="text-sm text-on-surface-variant mt-1 leading-relaxed">{store.address}</p>
+                  </div>
+
+                  {typeof store.rating === 'number' && (
+                    <div className="rounded-xl bg-primary/8 px-3 py-1.5 text-right">
+                      <p className="text-sm font-bold text-primary">{store.rating.toFixed(1)}</p>
+                      <p className="text-[10px] uppercase tracking-wider text-on-surface-muted">
+                        {store.user_rating_count ?? 0} reviews
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {store.phone_number && (
+                    <a
+                      href={`tel:${store.phone_number}`}
+                      className="glass px-3 py-2 rounded-xl text-sm font-medium text-on-surface flex items-center gap-2"
+                    >
+                      <Phone className="w-4 h-4" />
+                      Call Store
+                    </a>
+                  )}
+
+                  {store.google_maps_url && (
+                    <a
+                      href={store.google_maps_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="glass px-3 py-2 rounded-xl text-sm font-medium text-on-surface flex items-center gap-2"
+                    >
+                      <Navigation className="w-4 h-4" />
+                      Directions
+                    </a>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </section>
 
       {/* Action buttons */}

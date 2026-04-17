@@ -17,6 +17,8 @@ class Settings(BaseSettings):
     cloudinary_secret_key: Optional[str] = None
     cloudinary_cloud_name: Optional[str] = None
     cloudinary_upload_preset: Optional[str] = None
+    google_maps_api_key: Optional[str] = None
+    google_places_search_radius_meters: int = 5000
 
     model_config = SettingsConfigDict(
         env_file=".env",

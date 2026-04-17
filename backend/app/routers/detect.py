@@ -12,6 +12,10 @@ from ..ai_model import analyze_plant_image
 from ..cloudinary_service import cloudinary_is_configured, upload_image_to_cloudinary
 from ..config import settings
 from ..database import get_db
+from ..nearby_stores_service import (
+    google_places_is_configured,
+    search_nearby_treatment_stores,
+)
 from ..utilis import hash_password
 
 
@@ -143,3 +147,46 @@ def get_detection_history(db: Session = Depends(get_db)):
         }
         for row in rows
     ]
+
+
+@router.post("/nearby-stores", response_model=schemas.NearbyStoreSearchResponse)
+def get_nearby_stores(payload: schemas.NearbyStoreSearchRequest):
+    if not google_places_is_configured():
+        return {
+            "configured": False,
+            "message": "Add GOOGLE_MAPS_API_KEY in backend environment variables to enable nearby store lookup.",
+            "stores": [],
+        }
+
+    try:
+        query, stores = search_nearby_treatment_stores(
+            latitude=payload.latitude,
+            longitude=payload.longitude,
+            disease_name=payload.disease_name,
+            remedy=payload.remedy,
+        )
+    except httpx.HTTPStatusError as exc:
+        upstream_detail = exc.response.text.strip()
+        detail = f"Google Places returned {exc.response.status_code}."
+        if upstream_detail:
+            detail = f"{detail} {upstream_detail[:500]}"
+        raise HTTPException(status_code=502, detail=detail) from exc
+    except httpx.HTTPError as exc:
+        raise HTTPException(status_code=502, detail=f"Google Places request failed: {exc}") from exc
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Nearby store lookup failed: {exc}") from exc
+
+    if not stores:
+        return {
+            "configured": True,
+            "query": query,
+            "message": "No nearby treatment stores were found for this area yet. Try again from a different location or widen the search later.",
+            "stores": [],
+        }
+
+    return {
+        "configured": True,
+        "query": query,
+        "message": None,
+        "stores": stores,
+    }

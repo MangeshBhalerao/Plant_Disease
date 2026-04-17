@@ -100,3 +100,30 @@ class DetectionHistoryResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class NearbyStore(BaseModel):
+    name: str
+    address: str
+    google_maps_url: Optional[str] = None
+    phone_number: Optional[str] = None
+    website_url: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+    rating: Optional[float] = None
+    user_rating_count: Optional[int] = None
+    types: list[str] = []
+
+
+class NearbyStoreSearchRequest(BaseModel):
+    latitude: float
+    longitude: float
+    disease_name: str
+    remedy: Optional[str] = None
+
+
+class NearbyStoreSearchResponse(BaseModel):
+    configured: bool
+    query: Optional[str] = None
+    message: Optional[str] = None
+    stores: list[NearbyStore] = []
