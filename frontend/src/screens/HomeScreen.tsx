@@ -152,8 +152,8 @@ export const HomeScreen = ({ onAnalyzeComplete }: HomeScreenProps) => {
       >
         {[
           { value: '300+', label: 'Diseases', icon: Zap },
-          { value: '90%', label: 'Accuracy', icon: Shield },
-          { value: '500k+', label: 'Samples', icon: BrainCircuit },
+          { value: '80%', label: 'Accuracy', icon: Shield },
+          { value: '250', label: 'Samples', icon: BrainCircuit },
           { value: '<2s', label: 'Results', icon: Sparkles },
         ].map((stat, i) => (
           <motion.div 

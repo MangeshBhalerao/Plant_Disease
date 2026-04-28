@@ -110,7 +110,7 @@ export default function App() {
               <Leaf className="w-5 h-5 text-white" />
             </div>
             <span className="text-base sm:text-lg font-headline font-bold text-on-surface tracking-tight">
-              PlantCare <span className="text-gradient">AI</span>
+              Crop<span className="text-gradient">Care</span>
             </span>
           </motion.div>
 
