@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from .config import get_cors_origins
-from .routers import auth, detect, disease, news, schemes, users
+from .routers import auth, detect, disease, health, news, schemes, users
 
 app = FastAPI(title="Agrisense API", version="1.0.0")
 
@@ -32,5 +32,6 @@ app.include_router(users.router)
 app.include_router(auth.router)
 app.include_router(detect.router)
 app.include_router(news.router)
+app.include_router(health.router)
 app.include_router(schemes.router)
 app.include_router(disease.router)

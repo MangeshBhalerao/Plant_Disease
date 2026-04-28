@@ -1,5 +1,5 @@
 {
-  "name": "PlantCare AI",
+  "name": "CropCare",
   "description": "AI-powered plant disease diagnosis and health tracking with an editorial neo-minimalist design.",
   "requestFramePermissions": [
     "camera"
