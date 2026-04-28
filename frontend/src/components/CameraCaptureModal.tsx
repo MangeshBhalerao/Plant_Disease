@@ -41,20 +41,46 @@ export const CameraCaptureModal = ({
     }
   };
 
-  const getBackCameraDeviceId = async () => {
+  const getPreferredBackCameraDeviceId = async () => {
     if (!navigator.mediaDevices?.enumerateDevices) {
       return null;
     }
 
     const devices = await navigator.mediaDevices.enumerateDevices();
     const videoDevices = devices.filter((device) => device.kind === 'videoinput');
-    const rearCameras = videoDevices.filter((device) => /back|rear|environment/i.test(device.label));
-    const normalRearCamera = rearCameras.find((device) => !/ultra|0\.5/i.test(device.label));
+    const labeledDevices = videoDevices.filter((device) => device.label.trim());
 
-    return normalRearCamera?.deviceId ?? rearCameras[0]?.deviceId ?? null;
+    if (labeledDevices.length === 0) {
+      return null;
+    }
+
+    const rearCameras = labeledDevices.filter((device) => /back|rear|environment/i.test(device.label));
+    const normalRearCamera = rearCameras.find(
+      (device) => !/ultra|wide|0\.5|0,5|macro/i.test(device.label),
+    );
+    const namedBackCamera = labeledDevices.find((device) => /^back camera$/i.test(device.label.trim()));
+
+    return namedBackCamera?.deviceId ?? normalRearCamera?.deviceId ?? rearCameras[0]?.deviceId ?? null;
   };
 
   const startCameraStream = async () => {
+    const preferredBackCameraId = await getPreferredBackCameraDeviceId();
+
+    if (preferredBackCameraId) {
+      const preferredStream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          deviceId: { exact: preferredBackCameraId },
+          width: { ideal: 1280 },
+          height: { ideal: 960 },
+          aspectRatio: { ideal: 4 / 3 },
+        },
+        audio: false,
+      });
+
+      await attachStream(preferredStream);
+      return;
+    }
+
     const firstStream = await navigator.mediaDevices.getUserMedia({
       video: {
         facingMode: { ideal: 'environment' },
@@ -65,14 +91,14 @@ export const CameraCaptureModal = ({
       audio: false,
     });
 
-    const preferredBackCameraId = await getBackCameraDeviceId();
+    const backCameraIdAfterPermission = await getPreferredBackCameraDeviceId();
     const [currentTrack] = firstStream.getVideoTracks();
 
-    if (preferredBackCameraId && currentTrack?.getSettings().deviceId !== preferredBackCameraId) {
+    if (backCameraIdAfterPermission && currentTrack?.getSettings().deviceId !== backCameraIdAfterPermission) {
       firstStream.getTracks().forEach((track) => track.stop());
       const preferredStream = await navigator.mediaDevices.getUserMedia({
         video: {
-          deviceId: { exact: preferredBackCameraId },
+          deviceId: { exact: backCameraIdAfterPermission },
           width: { ideal: 1280 },
           height: { ideal: 960 },
           aspectRatio: { ideal: 4 / 3 },
