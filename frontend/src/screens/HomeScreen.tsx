@@ -170,32 +170,7 @@ export const HomeScreen = ({ onAnalyzeComplete }: HomeScreenProps) => {
         ))}
       </motion.section>
 
-      {/* ====== FEATURES GRID ====== */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        {[
-          { icon: BrainCircuit, title: "98.4% Accuracy", desc: "Validated by expert botanists and trained on 2M+ leaf samples." },
-          { icon: Sparkles, title: "Instant Results", desc: "Full health report and treatment plan in under 2 seconds." },
-          { icon: Sprout, title: "Expert Care", desc: "Recovery guides tailored to your specific plant species." },
-          { icon: Shield, title: "Garden Tracker", desc: "Track your garden's health over time with automated sync." },
-        ].map((feature, i) => (
-          <motion.div 
-            key={i}
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 * i + 0.35 }}
-            whileHover={{ y: -5, scale: 1.01 }}
-            className="card-soft p-6 sm:p-7 flex flex-col gap-4 group cursor-default"
-          >
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/8 to-secondary/5 flex items-center justify-center border border-primary/8 group-hover:border-primary/15 group-hover:shadow-sm group-hover:shadow-primary/5 transition-all">
-              <feature.icon className="w-6 h-6 text-primary group-hover:scale-110 transition-transform" />
-            </div>
-            <div>
-              <h3 className="font-headline font-bold text-on-surface text-base sm:text-lg mb-1.5">{feature.title}</h3>
-              <p className="text-sm text-on-surface-muted leading-relaxed">{feature.desc}</p>
-            </div>
-          </motion.div>
-        ))}
-      </section>
+      
     </motion.div>
   );
 };
