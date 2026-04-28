@@ -110,6 +110,7 @@ class NearbyStore(BaseModel):
     website_url: Optional[str] = None
     latitude: Optional[float] = None
     longitude: Optional[float] = None
+    distance_meters: Optional[int] = None
     rating: Optional[float] = None
     user_rating_count: Optional[int] = None
     types: list[str] = []
