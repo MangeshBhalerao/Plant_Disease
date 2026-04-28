@@ -33,7 +33,7 @@ class Detection(Base):
     confidence = Column(Float)
     reasoning = Column(Text, nullable=True)
     model_name_used = Column(String, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
 
     owner = relationship("User", back_populates="detections")
     disease = relationship("Disease", back_populates="detections")

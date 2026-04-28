@@ -39,7 +39,12 @@ export interface DetectionHistoryItem {
 }
 
 export interface NewsTickerResponse {
-  headlines: string[];
+  headlines: NewsHeadline[];
   source: string;
   live: boolean;
+}
+
+export interface NewsHeadline {
+  title: string;
+  url: string;
 }

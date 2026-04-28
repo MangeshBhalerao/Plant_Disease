@@ -4,8 +4,9 @@ from pathlib import Path
 from uuid import uuid4
 
 import httpx
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
 from sqlalchemy.orm import Session
+from sqlalchemy.orm import joinedload
 
 from .. import models, schemas
 from ..ai_model import analyze_plant_image
@@ -128,10 +129,18 @@ def detect_disease(
 
 
 @router.get("/history", response_model=list[schemas.DetectionHistoryResponse])
-def get_detection_history(db: Session = Depends(get_db)):
+def get_detection_history(
+    limit: int = Query(default=20, ge=1, le=100),
+    db: Session = Depends(get_db),
+):
     rows = (
         db.query(models.Detection)
+        .options(
+            joinedload(models.Detection.disease),
+            joinedload(models.Detection.remedy_entry),
+        )
         .order_by(models.Detection.created_at.desc())
+        .limit(limit)
         .all()
     )
     return [

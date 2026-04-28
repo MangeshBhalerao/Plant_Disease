@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'motion/react';
-import { Calendar, TrendingUp, ChevronRight } from 'lucide-react';
+import { Calendar, TrendingUp, ChevronRight, Loader2 } from 'lucide-react';
 import { buildImageUrl, getDetectionHistory } from '../api';
 import { DetectionHistoryItem } from '../types';
 import { cn } from '../utils/cn';
@@ -10,11 +10,15 @@ interface HistoryScreenProps {
 }
 
 const historyImageFallback = 'https://images.unsplash.com/photo-1591857177580-dc82b9ac4e17?auto=format&fit=crop&q=80&w=1200';
+const HISTORY_PAGE_SIZE = 6;
 
 export const HistoryScreen = ({ onOpenResult }: HistoryScreenProps) => {
   const [filter, setFilter] = useState('All Scans');
   const [historyItems, setHistoryItems] = useState<DetectionHistoryItem[]>([]);
+  const [historyLimit, setHistoryLimit] = useState(HISTORY_PAGE_SIZE);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasMoreHistory, setHasMoreHistory] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const filters = ['All Scans', 'Healthy', 'At Risk', 'Recovering'];
 
@@ -23,9 +27,11 @@ export const HistoryScreen = ({ onOpenResult }: HistoryScreenProps) => {
 
     const loadHistory = async () => {
       try {
-        const data = await getDetectionHistory();
+        setError(null);
+        const data = await getDetectionHistory(historyLimit + 1);
         if (active) {
-          setHistoryItems(data);
+          setHistoryItems(data.slice(0, historyLimit));
+          setHasMoreHistory(data.length > historyLimit);
         }
       } catch {
         if (active) {
@@ -43,7 +49,18 @@ export const HistoryScreen = ({ onOpenResult }: HistoryScreenProps) => {
     return () => {
       active = false;
     };
-  }, []);
+  }, [historyLimit]);
+
+  const handleLoadMore = () => {
+    setIsLoadingMore(true);
+    setHistoryLimit((currentLimit) => currentLimit + HISTORY_PAGE_SIZE);
+  };
+
+  useEffect(() => {
+    if (!isLoading) {
+      setIsLoadingMore(false);
+    }
+  }, [historyItems, isLoading]);
 
   const filteredItems = useMemo(() => {
     return historyItems.filter((item) => {
@@ -179,6 +196,26 @@ export const HistoryScreen = ({ onOpenResult }: HistoryScreenProps) => {
           );
         })}
       </div>
+
+      {!isLoading && !error && hasMoreHistory && (
+        <div className="flex justify-center pb-10">
+          <button
+            type="button"
+            onClick={handleLoadMore}
+            disabled={isLoadingMore}
+            className="glass px-5 py-3 rounded-2xl text-sm font-semibold text-on-surface flex items-center justify-center gap-2 hover:bg-white/80 transition-all disabled:opacity-70"
+          >
+            {isLoadingMore ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Loading more...
+              </>
+            ) : (
+              'Load more'
+            )}
+          </button>
+        </div>
+      )}
     </motion.div>
   );
 };

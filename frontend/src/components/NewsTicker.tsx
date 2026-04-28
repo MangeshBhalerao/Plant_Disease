@@ -1,11 +1,21 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Newspaper } from 'lucide-react';
 import { getNewsTicker } from '../api';
+import { NewsHeadline } from '../types';
 
-const fallbackHeadlines = [
-  'Plant disease updates and crop care alerts will appear here',
-  'Inspect leaves regularly to catch infections early',
-  'Follow local agriculture guidance before applying treatments',
+const fallbackHeadlines: NewsHeadline[] = [
+  {
+    title: 'Plant disease updates and crop care alerts will appear here',
+    url: 'https://news.google.com/search?q=plant%20disease%20agriculture',
+  },
+  {
+    title: 'Inspect leaves regularly to catch infections early',
+    url: 'https://news.google.com/search?q=early%20plant%20disease%20detection',
+  },
+  {
+    title: 'Follow local agriculture guidance before applying treatments',
+    url: 'https://news.google.com/search?q=agriculture%20crop%20treatment%20guidance',
+  },
 ];
 
 export const NewsTicker = () => {
@@ -38,7 +48,7 @@ export const NewsTicker = () => {
     };
   }, []);
 
-  const tickerText = useMemo(() => headlines.join('   |   '), [headlines]);
+  const tickerItems = useMemo(() => [...headlines, ...headlines], [headlines]);
 
   return (
     <div className="mt-2 glass-strong rounded-xl px-3 sm:px-4 py-2 max-w-7xl mx-auto overflow-hidden flex items-center gap-3">
@@ -48,8 +58,18 @@ export const NewsTicker = () => {
       </div>
       <div className="relative min-w-0 flex-1 overflow-hidden">
         <div className="news-ticker-track whitespace-nowrap text-xs sm:text-sm font-medium text-on-surface-variant">
-          <span>{tickerText}</span>
-          <span aria-hidden="true" className="pl-10">{tickerText}</span>
+          {tickerItems.map((item, index) => (
+            <a
+              key={`${item.title}-${index}`}
+              href={item.url}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-3 pr-8 hover:text-primary transition-colors"
+            >
+              <span>{item.title}</span>
+              <span className="text-primary/50" aria-hidden="true">|</span>
+            </a>
+          ))}
         </div>
       </div>
     </div>

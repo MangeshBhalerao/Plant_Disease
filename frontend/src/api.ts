@@ -63,8 +63,10 @@ export const detectDisease = async (file: File): Promise<DetectResponse> => {
   return response.data;
 };
 
-export const getDetectionHistory = async (): Promise<DetectionHistoryItem[]> => {
-  const response = await api.get<DetectionHistoryItem[]>('/detect/history');
+export const getDetectionHistory = async (limit = 20): Promise<DetectionHistoryItem[]> => {
+  const response = await api.get<DetectionHistoryItem[]>('/detect/history', {
+    params: { limit },
+  });
   return response.data;
 };
 

@@ -129,7 +129,12 @@ class NearbyStoreSearchResponse(BaseModel):
     stores: list[NearbyStore] = []
 
 
+class NewsHeadline(BaseModel):
+    title: str
+    url: str
+
+
 class NewsTickerResponse(BaseModel):
-    headlines: list[str]
+    headlines: list[NewsHeadline]
     source: str
     live: bool

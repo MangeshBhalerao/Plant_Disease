@@ -30,7 +30,7 @@ export const ProfileScreen: React.FC<{ onBack: () => void }> = ({ onBack }) => {
           <div className="relative shrink-0">
             <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden ring-3 ring-white shadow-md">
               <img 
-                src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=200" 
+                src="" 
                 alt="User" 
                 className="w-full h-full object-cover"
                 referrerPolicy="no-referrer"
