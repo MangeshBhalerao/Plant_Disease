@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     cloudinary_cloud_name: Optional[str] = None
     cloudinary_upload_preset: Optional[str] = None
     google_maps_api_key: Optional[str] = None
-    google_places_search_radius_meters: int = 5000
+    google_places_search_radius_meters: int = 15000
     news_rss_url: str = "https://news.google.com/rss/search?q=plant%20disease%20agriculture%20India&hl=en-IN&gl=IN&ceid=IN:en"
 
     model_config = SettingsConfigDict(

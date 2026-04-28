@@ -19,6 +19,73 @@ export const CameraCaptureModal = ({
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [isPreparingCamera, setIsPreparingCamera] = useState(false);
 
+  const attachStream = async (stream: MediaStream) => {
+    streamRef.current = stream;
+
+    const [videoTrack] = stream.getVideoTracks();
+    const capabilities = videoTrack?.getCapabilities?.() as
+      | (MediaTrackCapabilities & { zoom?: { min?: number; max?: number } })
+      | undefined;
+
+    if (videoTrack && capabilities?.zoom?.min !== undefined && capabilities?.zoom?.max !== undefined) {
+      const normalZoom = Math.min(Math.max(1, capabilities.zoom.min), capabilities.zoom.max);
+      await videoTrack.applyConstraints({
+        advanced: [{ zoom: normalZoom } as MediaTrackConstraintSet],
+      });
+    }
+
+    if (videoRef.current) {
+      videoRef.current.srcObject = stream;
+      await videoRef.current.play();
+    }
+  };
+
+  const getBackCameraDeviceId = async () => {
+    if (!navigator.mediaDevices?.enumerateDevices) {
+      return null;
+    }
+
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const videoDevices = devices.filter((device) => device.kind === 'videoinput');
+    const rearCameras = videoDevices.filter((device) => /back|rear|environment/i.test(device.label));
+    const normalRearCamera = rearCameras.find((device) => !/ultra|0\.5/i.test(device.label));
+
+    return normalRearCamera?.deviceId ?? rearCameras[0]?.deviceId ?? null;
+  };
+
+  const startCameraStream = async () => {
+    const firstStream = await navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: { ideal: 'environment' },
+        width: { ideal: 1280 },
+        height: { ideal: 960 },
+        aspectRatio: { ideal: 4 / 3 },
+      },
+      audio: false,
+    });
+
+    const preferredBackCameraId = await getBackCameraDeviceId();
+    const [currentTrack] = firstStream.getVideoTracks();
+
+    if (preferredBackCameraId && currentTrack?.getSettings().deviceId !== preferredBackCameraId) {
+      firstStream.getTracks().forEach((track) => track.stop());
+      const preferredStream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          deviceId: { exact: preferredBackCameraId },
+          width: { ideal: 1280 },
+          height: { ideal: 960 },
+          aspectRatio: { ideal: 4 / 3 },
+        },
+        audio: false,
+      });
+
+      await attachStream(preferredStream);
+      return;
+    }
+
+    await attachStream(firstStream);
+  };
+
   useEffect(() => {
     if (!open) {
       if (streamRef.current) {
@@ -39,16 +106,7 @@ export const CameraCaptureModal = ({
       setCameraError(null);
 
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: 'environment' },
-          audio: false,
-        });
-
-        streamRef.current = stream;
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          await videoRef.current.play();
-        }
+        await startCameraStream();
       } catch (error) {
         console.error('Unable to access camera', error);
         setCameraError('Camera permission was denied or no camera is available.');
@@ -78,16 +136,7 @@ export const CameraCaptureModal = ({
     setIsPreparingCamera(true);
 
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment' },
-        audio: false,
-      });
-
-      streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        await videoRef.current.play();
-      }
+      await startCameraStream();
     } catch (error) {
       console.error('Unable to restart camera', error);
       setCameraError('Unable to restart the camera.');

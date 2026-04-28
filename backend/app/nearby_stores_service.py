@@ -12,13 +12,8 @@ def google_places_is_configured() -> bool:
     return bool(settings.google_maps_api_key)
 
 
-def build_store_search_query(disease_name: str, remedy: str | None = None) -> str:
-    disease_hint = disease_name.strip() if disease_name else "plant disease"
-    remedy_hint = remedy.strip() if remedy else "plant treatment"
-    return (
-        "agricultural pesticide fertilizer nursery store for "
-        f"{disease_hint} remedy {remedy_hint}"
-    )
+def build_store_search_query() -> str:
+    return "agriculture store fertilizer pesticide seeds nursery plant care"
 
 
 def search_nearby_treatment_stores(
@@ -32,14 +27,14 @@ def search_nearby_treatment_stores(
     if not google_places_is_configured():
         return "", []
 
-    text_query = build_store_search_query(disease_name, remedy)
+    text_query = build_store_search_query()
 
     payload = {
         "textQuery": text_query,
         "pageSize": max(1, min(limit, 10)),
         "languageCode": "en",
         "regionCode": "IN",
-        "locationBias": {
+        "locationRestriction": {
             "circle": {
                 "center": {
                     "latitude": latitude,

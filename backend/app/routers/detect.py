@@ -189,7 +189,7 @@ def get_nearby_stores(payload: schemas.NearbyStoreSearchRequest):
         return {
             "configured": True,
             "query": query,
-            "message": "No nearby treatment stores were found for this area yet. Try again from a different location or widen the search later.",
+            "message": "No nearby agri stores were found for this area yet. Try again from a different location or increase the search radius.",
             "stores": [],
         }
 

@@ -242,10 +242,10 @@ export const ResultsScreen = ({ result, onNewScan, onAnalyzeComplete }: ResultsS
           <div>
             <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.15em] text-primary mb-1.5">Nearby Support</p>
             <h2 className="font-headline text-xl sm:text-2xl font-extrabold tracking-tight text-on-surface">
-              Treatment Stores Near You
+              Agri Stores Near You
             </h2>
             <p className="text-sm text-on-surface-muted mt-2 max-w-2xl">
-              Use your location to find nearby agri-input shops, nurseries, or plant treatment stores that may help with this diagnosis.
+              Use your location to find nearby agri-input shops, nurseries, fertilizer stores, and plant care suppliers.
             </p>
           </div>
 
