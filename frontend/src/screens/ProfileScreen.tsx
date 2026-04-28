@@ -30,7 +30,7 @@ export const ProfileScreen: React.FC<{ onBack: () => void }> = ({ onBack }) => {
           <div className="relative shrink-0">
             <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden ring-3 ring-white shadow-md">
               <img 
-                src="" 
+                src="https://img.freepik.com/free-vector/farmer-using-technology-digital-agriculture_53876-113813.jpg?semt=ais_hybrid&w=740&q=80" 
                 alt="User" 
                 className="w-full h-full object-cover"
                 referrerPolicy="no-referrer"

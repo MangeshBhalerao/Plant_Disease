@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Camera, RefreshCcw, X } from 'lucide-react';
 
 interface CameraCaptureModalProps {
@@ -185,8 +186,12 @@ export const CameraCaptureModal = ({
     return null;
   }
 
-  return (
-    <div className="fixed inset-0 z-[80] bg-black/50 backdrop-blur-sm px-4 py-6 flex items-center justify-center">
+  if (typeof document === 'undefined') {
+    return null;
+  }
+
+  return createPortal(
+    <div className="fixed inset-0 z-[2147483647] bg-black/50 backdrop-blur-sm px-4 py-6 flex items-center justify-center">
       <div className="w-full max-w-3xl rounded-[28px] bg-white shadow-2xl border border-white/60 overflow-hidden">
         <div className="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-outline-variant/60">
           <div>
@@ -203,7 +208,7 @@ export const CameraCaptureModal = ({
         </div>
 
         <div className="p-5 sm:p-6 space-y-4">
-          <div className="rounded-[24px] overflow-hidden bg-surface-dim border border-outline-variant/60 min-h-[280px] sm:min-h-[420px] flex items-center justify-center">
+          <div className="relative rounded-[24px] overflow-hidden bg-surface-dim border border-outline-variant/60 min-h-[280px] sm:min-h-[420px] flex items-center justify-center">
             {cameraError ? (
               <div className="px-6 py-10 text-center">
                 <p className="text-base font-semibold text-on-surface mb-2">Camera unavailable</p>
@@ -247,6 +252,7 @@ export const CameraCaptureModal = ({
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 };

@@ -76,7 +76,7 @@ export const Sidebar = ({ isOpen, onClose, currentPath, onNavigate }: SidebarPro
             <div className="mx-4 mb-5 p-3.5 rounded-2xl bg-surface-container flex items-center gap-3">
               <div className="relative shrink-0">
                 <img 
-                  src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=100" 
+                  src="https://img.freepik.com/free-vector/farmer-using-technology-digital-agriculture_53876-113813.jpg?semt=ais_hybrid&w=740&q=80" 
                   alt="User" 
                   className="w-11 h-11 rounded-xl object-cover ring-2 ring-primary/10"
                   referrerPolicy="no-referrer"
