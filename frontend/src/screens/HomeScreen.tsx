@@ -106,7 +106,7 @@ export const HomeScreen = ({ onAnalyzeComplete }: HomeScreenProps) => {
               </motion.h1>
               
               <motion.p {...fadeUp} className="text-on-surface-variant text-sm sm:text-base lg:text-lg leading-relaxed mb-6 sm:mb-8 max-w-md">
-                Identify 500+ plant diseases with a single photo. Get instant treatment plans powered by advanced computer vision.
+                Identify plant diseases with a single photo. Get instant treatment plans powered by advanced computer vision.
               </motion.p>
               
               <motion.div {...fadeUp} className="flex flex-col sm:flex-row w-full gap-3">
