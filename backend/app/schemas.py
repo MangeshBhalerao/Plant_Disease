@@ -127,3 +127,9 @@ class NearbyStoreSearchResponse(BaseModel):
     query: Optional[str] = None
     message: Optional[str] = None
     stores: list[NearbyStore] = []
+
+
+class NewsTickerResponse(BaseModel):
+    headlines: list[str]
+    source: str
+    live: bool

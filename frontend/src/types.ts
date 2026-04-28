@@ -37,3 +37,9 @@ export interface DetectionHistoryItem {
   model_name_used?: string | null;
   created_at: string;
 }
+
+export interface NewsTickerResponse {
+  headlines: string[];
+  source: string;
+  live: boolean;
+}

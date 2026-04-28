@@ -8,6 +8,7 @@ import { Leaf, Menu, Home, Scan, Clock, User } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { BottomNav } from './components/BottomNav';
+import { NewsTicker } from './components/NewsTicker';
 import { Sidebar } from './components/Sidebar';
 import { HomeScreen } from './screens/HomeScreen';
 import { ResultsScreen } from './screens/ResultsScreen';
@@ -162,6 +163,7 @@ export default function App() {
             </motion.button>
           </div>
         </nav>
+        <NewsTicker />
       </header>
 
       <Sidebar
@@ -174,7 +176,7 @@ export default function App() {
         }}
       />
 
-      <main className="relative z-10 pt-20 sm:pt-24 pb-24 md:pb-12 px-4 sm:px-6 max-w-7xl mx-auto w-full">
+      <main className="relative z-10 pt-32 sm:pt-36 pb-24 md:pb-12 px-4 sm:px-6 max-w-7xl mx-auto w-full">
         <AnimatePresence mode="wait">
           <Routes>
             <Route path="/" element={<HomeScreen key="home" onAnalyzeComplete={handleAnalyzeComplete} />} />

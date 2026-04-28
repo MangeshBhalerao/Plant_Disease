@@ -135,6 +135,11 @@
   100% { background-position: 200% 0; }
 }
 
+@keyframes news-ticker-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
 /* ============================================
    UTILITY CLASSES
    ============================================ */
@@ -226,4 +231,14 @@
 @utility animate-shimmer {
   background-size: 200% 100%;
   animation: shimmer 3s ease-in-out infinite;
+}
+
+.news-ticker-track {
+  display: inline-flex;
+  min-width: max-content;
+  animation: news-ticker-scroll 34s linear infinite;
+}
+
+.news-ticker-track:hover {
+  animation-play-state: paused;
 }

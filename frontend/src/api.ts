@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { DetectResponse, DetectionHistoryItem, NearbyStoreSearchResponse } from './types';
+import { DetectResponse, DetectionHistoryItem, NearbyStoreSearchResponse, NewsTickerResponse } from './types';
 
 const productionFallbackApiUrl = 'https://agrisense-2ens.onrender.com';
 const defaultApiUrl = import.meta.env.PROD ? productionFallbackApiUrl : 'http://127.0.0.1:8000';
@@ -75,5 +75,10 @@ export const getNearbyStores = async (payload: {
   remedy?: string;
 }): Promise<NearbyStoreSearchResponse> => {
   const response = await api.post<NearbyStoreSearchResponse>('/detect/nearby-stores', payload);
+  return response.data;
+};
+
+export const getNewsTicker = async (): Promise<NewsTickerResponse> => {
+  const response = await api.get<NewsTickerResponse>('/news/ticker');
   return response.data;
 };
