@@ -61,7 +61,7 @@ export const Sidebar = ({ isOpen, onClose, currentPath, onNavigate }: SidebarPro
                   <Leaf className="w-4 h-4 text-white" />
                 </div>
                 <span className="text-base font-headline font-bold text-on-surface tracking-tight">
-                  PlantCare <span className="text-gradient">AI</span>
+                  Crop<span className="text-gradient">Care</span>
                 </span>
               </div>
               <button 

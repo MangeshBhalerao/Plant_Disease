@@ -100,7 +100,7 @@ export const HomeScreen = ({ onAnalyzeComplete }: HomeScreenProps) => {
                 Smart Diagnosis
               </motion.div>
               
-              <motion.h1 {...fadeUp} className="font-headline font-extrabold text-3xl sm:text-4xl md:text-5xl lg:text-[3.5rem] xl:text-6xl leading-[1.08] tracking-tight text-on-surface mb-4 sm:mb-6">
+              <motion.h1 {...fadeUp} className="font-headline font-extrabold text-2xl sm:text-4xl md:text-5xl lg:text-[3.5rem] xl:text-6xl leading-[1.08] tracking-tight text-on-surface mb-4 sm:mb-6">
                 Your Plants, <br/>
                 <span className="text-gradient italic">Perfectly</span> Healthy.
               </motion.h1>
@@ -154,7 +154,7 @@ export const HomeScreen = ({ onAnalyzeComplete }: HomeScreenProps) => {
           { value: '300+', label: 'Diseases', icon: Zap },
           { value: '80%', label: 'Accuracy', icon: Shield },
           { value: '250', label: 'Samples', icon: BrainCircuit },
-          { value: '<2s', label: 'Results', icon: Sparkles },
+          { value: '<10s', label: 'Results', icon: Sparkles },
         ].map((stat, i) => (
           <motion.div 
             key={i}
